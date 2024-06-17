@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
+import { Module } from "@nestjs/common";
+import { PrismaService } from "./prisma/prisma.service";
+import { CreateAccountController } from "./controllers/create-account.controller";
 
 @Module({
-  controllers: [AppController], // Recebe os controllers que existem nesses modules.
-  providers: [AppService], // Declarar todas as dependências que os meus controllers podem ter.
+  controllers: [CreateAccountController], // Recebe os controllers que existem nesses modules.
+  providers: [PrismaService], // Declarar todas as dependências que os meus controllers podem ter.
 })
 
 /*
