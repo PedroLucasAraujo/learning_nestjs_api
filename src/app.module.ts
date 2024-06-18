@@ -4,6 +4,7 @@ import { PrismaService } from "./prisma/prisma.service";
 import { CreateAccountController } from "./controllers/create-account.controller";
 import { envSchema } from "./env";
 import { AuthModule } from "./auth/auth.module";
+import { AuthenticateController } from "./controllers/authenticate-controller";
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { AuthModule } from "./auth/auth.module";
     }),
     AuthModule,
   ],
-  controllers: [CreateAccountController], // Recebe os controllers que existem nesses modules.
+  controllers: [CreateAccountController, AuthenticateController], // Recebe os controllers que existem nesses modules.
   providers: [PrismaService], // Declarar todas as dependências que os meus controllers podem ter.
 })
 
