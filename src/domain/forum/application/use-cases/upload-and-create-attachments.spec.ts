@@ -5,12 +5,14 @@ import { InvalidAttachmentTypeError } from "./errors/invalid-attachment-type-err
 
 let inMemoryAttachmentsRepository: InMemoryAttachmentsRepository;
 let fakeUploader: FakeUploader;
+
 let sut: UploadAndCreateAttachmentUseCase;
 
-describe("Upload and create Attachments", () => {
+describe("Upload and create attachment", () => {
   beforeEach(() => {
     inMemoryAttachmentsRepository = new InMemoryAttachmentsRepository();
     fakeUploader = new FakeUploader();
+
     sut = new UploadAndCreateAttachmentUseCase(
       inMemoryAttachmentsRepository,
       fakeUploader
@@ -36,7 +38,7 @@ describe("Upload and create Attachments", () => {
     );
   });
 
-  it("should not be able to upload and attachment with invalid file type", async () => {
+  it("should not be able to upload an attachment with invalid file type", async () => {
     const result = await sut.execute({
       fileName: "profile.mp3",
       fileType: "audio/mpeg",
