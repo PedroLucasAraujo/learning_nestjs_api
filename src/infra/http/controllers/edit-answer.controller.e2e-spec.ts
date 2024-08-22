@@ -1,26 +1,25 @@
-import { Answer } from "@/domain/forum/enterprise/entities/answer";
-import { AppModule } from "@/infra/app.module";
-import { DatabaseModule } from "@/infra/database/database.module";
-import { PrismaService } from "@/infra/database/prisma/prisma.service";
-import { INestApplication } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { Test } from "@nestjs/testing";
-import request from "supertest";
-import { AnswerFactory } from "test/factories/make-answer";
-import { AnswerAttachmentFactory } from "test/factories/make-answer-attachments";
-import { AttachmentFactory } from "test/factories/make-attachment";
-import { QuestionFactory } from "test/factories/make-question";
-import { StudentFactory } from "test/factories/make-student";
+import { AppModule } from '@/infra/app.module'
+import { DatabaseModule } from '@/infra/database/database.module'
+import { PrismaService } from '@/infra/database/prisma/prisma.service'
+import { INestApplication } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Test } from '@nestjs/testing'
+import request from 'supertest'
+import { AnswerFactory } from 'test/factories/make-answer'
+import { AnswerAttachmentFactory } from 'test/factories/make-answer-attachments'
+import { AttachmentFactory } from 'test/factories/make-attachment'
+import { QuestionFactory } from 'test/factories/make-question'
+import { StudentFactory } from 'test/factories/make-student'
 
-describe("Answer Questions (E2E)", () => {
-  let app: INestApplication;
-  let prisma: PrismaService;
-  let jwt: JwtService;
-  let studentFactory: StudentFactory;
-  let questionFactory: QuestionFactory;
-  let attachmentFactory: AttachmentFactory;
-  let answerAttachmentFactory: AnswerAttachmentFactory;
-  let answerFactory: AnswerFactory;
+describe('Answer Questions (E2E)', () => {
+  let app: INestApplication
+  let prisma: PrismaService
+  let jwt: JwtService
+  let studentFactory: StudentFactory
+  let questionFactory: QuestionFactory
+  let attachmentFactory: AttachmentFactory
+  let answerAttachmentFactory: AnswerAttachmentFactory
+  let answerFactory: AnswerFactory
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -32,76 +31,76 @@ describe("Answer Questions (E2E)", () => {
         AttachmentFactory,
         AnswerAttachmentFactory,
       ],
-    }).compile();
+    }).compile()
 
-    app = moduleRef.createNestApplication();
-    studentFactory = moduleRef.get(StudentFactory);
-    questionFactory = moduleRef.get(QuestionFactory);
-    answerFactory = moduleRef.get(AnswerFactory);
-    attachmentFactory = moduleRef.get(AttachmentFactory);
-    answerAttachmentFactory = moduleRef.get(AnswerAttachmentFactory);
-    prisma = moduleRef.get(PrismaService);
+    app = moduleRef.createNestApplication()
+    studentFactory = moduleRef.get(StudentFactory)
+    questionFactory = moduleRef.get(QuestionFactory)
+    answerFactory = moduleRef.get(AnswerFactory)
+    attachmentFactory = moduleRef.get(AttachmentFactory)
+    answerAttachmentFactory = moduleRef.get(AnswerAttachmentFactory)
+    prisma = moduleRef.get(PrismaService)
 
-    jwt = moduleRef.get(JwtService);
+    jwt = moduleRef.get(JwtService)
 
-    await app.init();
-  });
+    await app.init()
+  })
 
-  test("[POST] /questions/:questionId/answers", async () => {
-    const user = await studentFactory.makePrismaStudent();
+  test('[POST] /questions/:questionId/answers', async () => {
+    const user = await studentFactory.makePrismaStudent()
 
-    const accessToken = jwt.sign({ sub: user.id.toString() });
+    const accessToken = jwt.sign({ sub: user.id.toString() })
 
     const question = await questionFactory.makePrismaQuestion({
       authorId: user.id,
-    });
+    })
 
     const answer = await answerFactory.makePrismaAnswer({
       questionId: question.id,
       authorId: user.id,
-    });
+    })
 
-    const attachment1 = await attachmentFactory.makePrismaAttachment();
-    const attachment2 = await attachmentFactory.makePrismaAttachment();
+    const attachment1 = await attachmentFactory.makePrismaAttachment()
+    const attachment2 = await attachmentFactory.makePrismaAttachment()
 
     await answerAttachmentFactory.makePrismaAnswerAttachment({
       attachmentId: attachment1.id,
       answerId: answer.id,
-    });
+    })
 
     await answerAttachmentFactory.makePrismaAnswerAttachment({
       attachmentId: attachment2.id,
       answerId: answer.id,
-    });
+    })
 
-    const attachment3 = await attachmentFactory.makePrismaAttachment();
+    const attachment3 = await attachmentFactory.makePrismaAttachment()
 
-    const answerId = answer.id.toString();
+    const answerId = answer.id.toString()
 
     const response = await request(app.getHttpServer())
       .put(`/answers/${answerId}`)
-      .set("Authorization", `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({
-        content: "New answer content",
+        content: 'New answer content',
         attachments: [attachment1.id.toString(), attachment3.id.toString()],
-      });
+      })
 
-    expect(response.statusCode).toBe(204);
+    expect(response.statusCode).toBe(204)
 
     const answerOnDatabase = await prisma.answer.findFirst({
       where: {
-        content: "New answer content",
+        content: 'New answer content',
       },
-    });
+    })
 
     const attachmentsOnDatabase = await prisma.attachment.findMany({
       where: {
         answerId: answerOnDatabase?.id,
       },
-    });
+    })
 
-    expect(answerOnDatabase).toBeTruthy();
-    expect(attachmentsOnDatabase).toHaveLength(2);
+    expect(answerOnDatabase).toBeTruthy()
+    expect(attachmentsOnDatabase).toHaveLength(2)
     expect(attachmentsOnDatabase).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -110,7 +109,7 @@ describe("Answer Questions (E2E)", () => {
         expect.objectContaining({
           id: attachment3.id.toString(),
         }),
-      ])
-    );
-  });
-});
+      ]),
+    )
+  })
+})

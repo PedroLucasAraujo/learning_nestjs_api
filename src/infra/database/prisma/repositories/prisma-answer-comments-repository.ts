@@ -1,11 +1,11 @@
-import { PaginationParams } from "@/core/repositories/pagination-params";
-import { AnswerCommentsRepository } from "@/domain/forum/application/repositories/answer-comments-repository";
-import { AnswerComment } from "@/domain/forum/enterprise/entities/answer-comment";
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma.service";
-import { PrismaAnswerCommentMapper } from "../mappers/prisma-answer-comment-mapper";
-import { CommentWithAuthor } from "@/domain/forum/enterprise/entities/value-objects/comment-with-author";
-import { PrismaCommentWithAuthorMapper } from "../mappers/prisma-comment-with-author-mapper";
+import { PaginationParams } from '@/core/repositories/pagination-params'
+import { AnswerCommentsRepository } from '@/domain/forum/application/repositories/answer-comments-repository'
+import { AnswerComment } from '@/domain/forum/enterprise/entities/answer-comment'
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from '../prisma.service'
+import { PrismaAnswerCommentMapper } from '../mappers/prisma-answer-comment-mapper'
+import { CommentWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/comment-with-author'
+import { PrismaCommentWithAuthorMapper } from '../mappers/prisma-comment-with-author-mapper'
 
 @Injectable()
 export class PrismaAnswersCommentsRepository
@@ -18,34 +18,34 @@ export class PrismaAnswersCommentsRepository
       where: {
         id,
       },
-    });
+    })
 
-    if (!answerComment) return null;
+    if (!answerComment) return null
 
-    return PrismaAnswerCommentMapper.toDomain(answerComment);
+    return PrismaAnswerCommentMapper.toDomain(answerComment)
   }
 
   async findManyByAnswerId(
     answerId: string,
-    { page }: PaginationParams
+    { page }: PaginationParams,
   ): Promise<AnswerComment[]> {
     const answerComments = await this.prisma.comment.findMany({
       where: {
         answerId,
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
       take: 20,
       skip: (page - 1) * 20,
-    });
+    })
 
-    return answerComments.map(PrismaAnswerCommentMapper.toDomain);
+    return answerComments.map(PrismaAnswerCommentMapper.toDomain)
   }
 
   async findManyByAnswerIdWithAuthor(
     questionId: string,
-    { page }: PaginationParams
+    { page }: PaginationParams,
   ): Promise<CommentWithAuthor[]> {
     const answerComments = await this.prisma.comment.findMany({
       where: {
@@ -55,21 +55,21 @@ export class PrismaAnswersCommentsRepository
         author: true,
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
       take: 20,
       skip: (page - 1) * 20,
-    });
+    })
 
-    return answerComments.map(PrismaCommentWithAuthorMapper.toDomain);
+    return answerComments.map(PrismaCommentWithAuthorMapper.toDomain)
   }
 
   async create(answerComment: AnswerComment): Promise<void> {
-    const data = PrismaAnswerCommentMapper.toPrisma(answerComment);
+    const data = PrismaAnswerCommentMapper.toPrisma(answerComment)
 
     await this.prisma.comment.create({
       data,
-    });
+    })
   }
 
   async delete(answerComment: AnswerComment): Promise<void> {
@@ -77,6 +77,6 @@ export class PrismaAnswersCommentsRepository
       where: {
         id: answerComment.id.toString(),
       },
-    });
+    })
   }
 }
